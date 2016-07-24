@@ -70,10 +70,13 @@ type
 
   { Keyword DFA: Accepts keywords set after construction }
   TKeywordDFA = class(TDFA)
+  private
+    FTok: TToken;
+    FAttr: IntPtr;
   protected
     function GetToken: TLexTok; override;
   public
-    procedure SetKeyword(Keyword: ansistring);
+    procedure SetKeyword(Keyword: ansistring; Tok: TToken; Attr: IntPtr);
   end;
 
   { Symbol DFA: Accepts =, <. >, (, ), {, }, ; }
@@ -98,8 +101,46 @@ type
   protected
     function GetToken: TLexTok; override;
   public
-    constructor Create(InputString: PAnsiChar; UseCaseSense: boolean=True);
-  override;
+    constructor Create(InputString: PAnsiChar; UseCaseSense: boolean = True);
+      override;
+  end;
+
+  { Int DFA: Accepts Hex (0xNum) Oct (0Num) and Dec Numbers
+       (also directly reads their Value into Attr) }
+  TIntDFA = class(TDFA)
+  private
+    FOct: boolean;
+  protected
+    function GetToken: TLexTok; override;
+  public
+    function PerformStep: TDFAState; override;
+    constructor Create(InputString: PAnsiChar; UseCaseSense: boolean = True);
+      override;
+  end;
+
+  { Float DFA: Accepts (+|-)Num.Num(e|E)(+|-)Num }
+  TFloatDFA = class(TDFA)
+  protected
+    function GetToken: TLexTok; override;
+  public
+    constructor Create(InputString: PAnsiChar; UseCaseSense: boolean = True);
+      override;
+  end;
+
+  { Ident DFA: Matches identefiers}
+  TIdentDFA = class(TDFA)
+  public
+    constructor Create(InputString: PAnsiChar; UseCaseSense: boolean = True);
+      override;
+  end;
+
+  { FullIdent DFA: Matches Ident(.Ident)* }
+  TFullIdentDFA = class(TDFA)
+  protected
+    function GetToken: TLexTok; override;
+  public
+    constructor Create(InputString: PAnsiChar; UseCaseSense: boolean = True);
+      override;
   end;
 
 implementation
@@ -200,7 +241,7 @@ end;
 
 function TDFA.GetToken: TLexTok;
 begin
-  Result.Tag := 0;
+  Result.Attr := 0;
   Result.Token := tkIdent;
   Result.Len := FLength;
   Result.Start := FPosition - FLength;
@@ -240,7 +281,7 @@ begin
   FTransitions := TTransitionManager.Create(1, -1);
   FTransitions.CaseSense := UseCaseSense;
   FPosition := InputString;
-  FLength:=0;
+  FLength := 0;
 end;
 
 destructor TDFA.Destroy;
@@ -254,14 +295,17 @@ end;
 function TKeywordDFA.GetToken: TLexTok;
 begin
   Result := inherited GetToken;
-  Result.Token := tkKeyword;
+  Result.Token := FTok;
+  Result.Attr := FAttr;
 end;
 
-procedure TKeywordDFA.SetKeyword(Keyword: ansistring);
+procedure TKeywordDFA.SetKeyword(Keyword: ansistring; Tok: TToken; Attr: IntPtr);
 var
   i: integer;
 begin
   FTransitions.StateCount := Length(Keyword) + 1;
+  FTok := Tok;
+  FAttr := Attr;
   for i := 1 to Length(Keyword) do
     FTransitions.Transition[i - 1, Keyword[i]] := i;
   AddToFinalState(Length(Keyword));
@@ -272,11 +316,39 @@ end;
 function TSymbolDFA.GetToken: TLexTok;
 begin
   Result := inherited GetToken;
-  Result.Token := tkSymbol;
-  case FPosition^ of
-  '<', '>', '(',')','{','}': Result.Tag:=Ord(stBracket);
-  '=': Result.Tag:=Ord(stAsg);
-  ';': Result.Tag:=ord(stEmpty);
+  case Result.Start^ of
+    '<':
+    begin
+      Result.Token := tkAngleBracket;
+      Result.Attr := 0; // opend
+    end;
+    '>':
+    begin
+      Result.Token := tkAngleBracket;
+      Result.Attr := 1; // closed
+    end;
+    '(':
+    begin
+      Result.Token := tkParenthesis;
+      Result.Attr := 0; // opend
+    end;
+    ')':
+    begin
+      Result.Token := tkParenthesis;
+      Result.Attr := 1; // closed
+    end;
+    '{':
+    begin
+      Result.Token := tkBrace;
+      Result.Attr := 0; // opend
+    end;
+    '}':
+    begin
+      Result.Token := tkBrace;
+      Result.Attr := 1; // closed
+    end;
+    '=': Result.Token := tkAssign;
+    ';': Result.Token := tkEmpty;
   end;
 end;
 
@@ -289,62 +361,213 @@ end;
 
 { TStringDFA }
 
-    function TStringDFA.GetToken: TLexTok;
-    begin
+function TStringDFA.GetToken: TLexTok;
+begin
   Result := inherited GetToken;
-  Result.Token := tkConst;
-  Result.Tag:=Ord(ctString);
-    end;
+  Result.Token := tkStringConst;
+end;
 
-    function TStringDFA.PerformStep: TDFAState;
-    begin
-      Result:=dsProductive;
-      if FLength=0 then
-      begin
-        if FPosition^ <> '"' then
-          FCurrentState:=-1;
-      end
-      else if (FPosition^=#10) or (FCurrentState=-1) then
-      begin
-        Result:=dsSink;  
-          FCurrentState:=-1;
-      end
-      else if FPosition^ = '"' then
-        Result:=dsFinal;
-      inc(FLength);
-      Inc(FPosition);
-    end;
+function TStringDFA.PerformStep: TDFAState;
+begin
+  Result := dsProductive;
+  if FLength = 0 then
+  begin
+    if FPosition^ <> '"' then
+      FCurrentState := -1;
+  end
+  else if (FPosition^ = #10) or (FCurrentState = -1) then
+  begin
+    Result := dsSink;
+    FCurrentState := -1;
+  end
+  else if FPosition^ = '"' then
+    Result := dsFinal;
+  Inc(FLength);
+  Inc(FPosition);
+end;
 
 { TBoolDFA }
 
-        function TBoolDFA.GetToken: TLexTok;
-        begin
-          Result:=inherited GetToken;
-          Result.Token:=tkSymbol;
-          Result.Tag:=ord(ctBool);
-        end;
+function TBoolDFA.GetToken: TLexTok;
+begin
+  Result := inherited GetToken;
+  Result.Token := tkBoolConst;
+end;
 
-        constructor TBoolDFA.Create(InputString: PAnsiChar; UseCaseSense: boolean=True);
-        var c: Char;
-          i: Integer;
-        begin
-          inherited Create(InputString, UseCaseSense);
-          FTransitions.SetStateCount(10);
-          i:=1;
-          for c in 'true' do
-          begin
-            FTransitions.Transition[i-1, c]:=i;
-            inc(i);
-          end;  
-            FTransitions.Transition[0, 'f']:=i;
-            inc(i);
-          for c in 'alse' do
-          begin
-            FTransitions.Transition[i-1, c]:=i;
-            inc(i);
-          end;
-          AddToFinalState(4);
-          AddToFinalState(9);
-        end;
+constructor TBoolDFA.Create(InputString: PAnsiChar; UseCaseSense: boolean = True);
+var
+  c: char;
+  i: integer;
+begin
+  inherited Create(InputString, UseCaseSense);
+  FTransitions.SetStateCount(10);
+  i := 1;
+  for c in 'true' do
+  begin
+    FTransitions.Transition[i - 1, c] := i;
+    Inc(i);
+  end;
+  FTransitions.Transition[0, 'f'] := i;
+  Inc(i);
+  for c in 'alse' do
+  begin
+    FTransitions.Transition[i - 1, c] := i;
+    Inc(i);
+  end;
+  AddToFinalState(4);
+  AddToFinalState(9);
+end;
+
+{ TIntDFA }
+
+function TIntDFA.GetToken: TLexTok;
+var
+  s: string;
+begin
+  Result := inherited GetToken;
+  Result.Token := tkIntConst;
+  if FOct then
+  begin
+    if Result.Start^ = '0' then
+      s := '&' + Copy(Result.Start, 2, FLength - 1)
+    else
+      s := Result.Start^ + '&' + Copy(Result.Start, 3, FLength - 2);
+  end
+  else
+    s := Copy(Result.Start, 1, FLength);
+  Result.Attr := StrToInt(s);
+end;
+
+function TIntDFA.PerformStep: TDFAState;
+begin
+  Result := inherited PerformStep;
+  FOct := FCurrentState = 3;
+end;
+
+constructor TIntDFA.Create(InputString: PAnsiChar; UseCaseSense: boolean = True);
+begin
+  inherited Create(InputString, False);
+  FOct := False;
+  FTransitions.StateCount := 7;
+  // +/-
+  FTransitions.AddTransition(0, 6, ['+', '-']);
+  // Dec Number
+  FTransitions.AddTransition(0, 1, ['1', '2', '3', '4', '5', '6', '7', '8', '9']);
+  // +/-
+  FTransitions.AddTransition(6, 1, ['1', '2', '3', '4', '5', '6', '7', '8', '9']);
+  FTransitions.AddTransition(1, 1, ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']);
+  AddToFinalState(1);
+  // Oct & Hex
+  FTransitions.Transition[0, '0'] := 2;
+  // +/-
+  FTransitions.Transition[6, '0'] := 2;
+  // Oct
+  FTransitions.AddTransition(2, 3, ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']);
+  FTransitions.AddTransition(3, 3, ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']);
+  AddToFinalState(3);
+  // Hex
+  FTransitions.Transition[2, 'x'] := 4;
+  FTransitions.AddTransition(4, 5,
+    ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f']);
+  FTransitions.AddTransition(5, 5,
+    ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f']);
+  AddToFinalState(5);
+end;
+
+{ TFloatDFA }
+
+function TFloatDFA.GetToken: TLexTok;
+begin
+  Result := inherited GetToken;
+  Result.Token := tkFloatConst;
+end;
+
+constructor TFloatDFA.Create(InputString: PAnsiChar; UseCaseSense: boolean = True);
+begin
+  inherited Create(InputString, False);
+  FTransitions.SetStateCount(14);
+  // +/-
+  FTransitions.AddTransition(0, 1, ['+', '-']);
+  // dec.[dec][EDec] and decExpDec
+  FTransitions.AddTransition(0, 2, ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']);
+  FTransitions.AddTransition(1, 2, ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']);
+  // Any dec before .
+  FTransitions.AddTransition(2, 2, ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']);
+  FTransitions.Transition[2, '.'] := 3;
+  // .[dec][EDec]
+  FTransitions.Transition[0, '.'] := 4;
+  FTransitions.Transition[1, '.'] := 4;
+  FTransitions.AddTransition(4, 3, ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']);
+  // Stay in State 3 for any new digit
+  FTransitions.AddTransition(3, 3, ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']);
+  // State 3 is final state
+  AddToFinalState(3);
+
+  //Exp State
+  FTransitions.Transition[3, 'e'] := 5;
+  FTransitions.Transition[2, 'e'] := 5;
+  FTransitions.AddTransition(5, 6, ['+', '-']);
+  FTransitions.AddTransition(5, 7, ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']);
+  FTransitions.AddTransition(8, 7, ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']);
+  FTransitions.AddTransition(7, 7, ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']);
+  AddToFinalState(7);
+
+  // nan
+  FTransitions.Transition[0, 'n'] := 8;
+  FTransitions.Transition[1, 'n'] := 8;
+  FTransitions.Transition[8, 'a'] := 9;
+  FTransitions.Transition[9, 'n'] := 10;
+  AddToFinalState(10);
+  // inf
+  FTransitions.Transition[0, 'i'] := 11;
+  FTransitions.Transition[1, 'i'] := 11;
+  FTransitions.Transition[11, 'n'] := 12;
+  FTransitions.Transition[12, 'f'] := 13;
+  AddToFinalState(13);
+end;
+
+{ TIdentDFA }
+
+constructor TIdentDFA.Create(InputString: PAnsiChar; UseCaseSense: boolean = True);
+var
+  c: TAnsiChar;
+begin
+  inherited Create(InputString, UseCaseSense);
+  FTransitions.SetStateCount(2);
+  for c in ['A'..'Z', 'a'..'z'] do
+  begin
+    FTransitions.Transition[0, c] := 1;
+    FTransitions.Transition[1, c] := 1;
+  end;
+  FTransitions.AddTransition(1, 1, ['0', '1', '2', '3', '4', '5', '6',
+    '7', '8', '9', '_']);
+  AddToFinalState(1);
+end;
+
+
+{ TFullIdentDFA }
+function TFullIdentDFA.GetToken: TLexTok;
+begin
+  Result := inherited GetToken;
+  Result.Token := tkFullIdent;
+end;
+
+constructor TFullIdentDFA.Create(InputString: PAnsiChar; UseCaseSense: boolean = True);
+var
+  c: TAnsiChar;
+begin
+  inherited Create(InputString, UseCaseSense);
+  FTransitions.SetStateCount(3);
+  for c in ['A'..'Z', 'a'..'z'] do
+  begin
+    FTransitions.Transition[0, c] := 1;
+    FTransitions.Transition[1, c] := 1;
+    FTransitions.Transition[2, c] := 1;
+  end;
+  FTransitions.AddTransition(1, 1, ['0', '1', '2', '3', '4', '5', '6',
+    '7', '8', '9', '_']);
+  AddToFinalState(1);
+  FTransitions.Transition[1, '.'] := 2;
+end;
 
 end.

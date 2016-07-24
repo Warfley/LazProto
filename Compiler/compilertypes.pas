@@ -8,14 +8,13 @@ uses
   Classes, gvector;
 
 type
-  TToken = (tkKeyword, tkConst, tkSymbol, tkIdent);
-  TConstType = (ctInt, ctFloat, ctBool, ctString);
-  TSymbolType = (stAsg, stBracket, stEmpty);
+  TToken = (tkType, tkStringConst, tkBoolConst, tkIntConst, tkFloatConst,
+  tkAssign, tkAngleBracket, tkBrace, tkParenthesis, tkEmpty, tkIdent, tkFullIdent);
   TLexTok = record
     Token: TToken;
     Start: PAnsiChar;
-    Len: IntPtr;
-    Tag: IntPtr;
+    Len,
+    Attr: IntPtr;
   end;
 
   TLexOut = specialize TVector<TLexTok>;
