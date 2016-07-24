@@ -9,7 +9,7 @@ uses
 
 type
   TToken = (tkType, tkStringConst, tkBoolConst, tkIntConst, tkFloatConst,
-  tkAssign, tkAngleBracket, tkBrace, tkParenthesis, tkEmpty, tkIdent, tkFullIdent);
+  tkAssign, tkAngleBracket, tkBrace, tkParenthesis, tkEmpty, tkIdent, tkBlank);
   TLexTok = record
     Token: TToken;
     Start: PAnsiChar;

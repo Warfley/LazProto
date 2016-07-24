@@ -9,12 +9,16 @@
       </Flags>
       <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
-      <Title Value="lazprotoc"/>
+      <Title Value="FPProtoc"/>
       <UseAppBundle Value="False"/>
       <ResourceType Value="res"/>
     </General>
     <VersionInfo>
-      <StringTable ProductVersion=""/>
+      <UseVersionInfo Value="True"/>
+      <AutoIncrementBuild Value="True"/>
+      <BuildNr Value="1"/>
+      <Attributes pvaDebug="True"/>
+      <StringTable FileDescription="Google Protocol Buffer 3 Compiler for FPC" LegalCopyright="Copyright (c) Frederic Kehrein 2016" ProductName="FreePascal Protobuf Compiler" ProductVersion="v1"/>
     </VersionInfo>
     <BuildModes Count="1">
       <Item1 Name="Default" Default="True"/>
@@ -27,9 +31,9 @@
         <FormatVersion Value="1"/>
       </local>
     </RunParams>
-    <Units Count="4">
+    <Units Count="5">
       <Unit0>
-        <Filename Value="lazprotoc.pas"/>
+        <Filename Value="FPProtoc.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit0>
       <Unit1>
@@ -47,15 +51,21 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="DFA"/>
       </Unit3>
+      <Unit4>
+        <Filename Value="Utils/computils.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CompUtils"/>
+      </Unit4>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="11"/>
     <Target>
-      <Filename Value="lazprotoc"/>
+      <Filename Value="FPProtoc"/>
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
+      <OtherUnitFiles Value="Utils"/>
       <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
   </CompilerOptions>

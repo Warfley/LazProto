@@ -63,6 +63,7 @@ type
     destructor Destroy; override;
 
     property Token: TLexTok read GetToken;
+    property Position: PAnsiChar read FPosition write FPosition;
     property CaseSense: boolean read GetCaseSense write SetCaseSense;
   end;
 
@@ -129,13 +130,15 @@ type
 
   { Ident DFA: Matches identefiers}
   TIdentDFA = class(TDFA)
+  protected
+    function GetToken: TLexTok; override;
   public
     constructor Create(InputString: PAnsiChar; UseCaseSense: boolean = True);
       override;
   end;
 
-  { FullIdent DFA: Matches Ident(.Ident)* }
-  TFullIdentDFA = class(TDFA)
+  { Blank DFA: Matches all Whitespace Characters }
+  TBlankDFA = class(TDFA)
   protected
     function GetToken: TLexTok; override;
   public
@@ -528,31 +531,14 @@ end;
 
 { TIdentDFA }
 
-constructor TIdentDFA.Create(InputString: PAnsiChar; UseCaseSense: boolean = True);
-var
-  c: TAnsiChar;
-begin
-  inherited Create(InputString, UseCaseSense);
-  FTransitions.SetStateCount(2);
-  for c in ['A'..'Z', 'a'..'z'] do
-  begin
-    FTransitions.Transition[0, c] := 1;
-    FTransitions.Transition[1, c] := 1;
-  end;
-  FTransitions.AddTransition(1, 1, ['0', '1', '2', '3', '4', '5', '6',
-    '7', '8', '9', '_']);
-  AddToFinalState(1);
-end;
-
-
-{ TFullIdentDFA }
-function TFullIdentDFA.GetToken: TLexTok;
+function TIdentDFA.GetToken: TLexTok;
 begin
   Result := inherited GetToken;
-  Result.Token := tkFullIdent;
+  Result.Token := tkIdent;
+  Result.Attr := ifthen(Pos('.', Copy(Result.Start, 1, Result.Len)) > 0, 1, 0);
 end;
 
-constructor TFullIdentDFA.Create(InputString: PAnsiChar; UseCaseSense: boolean = True);
+constructor TIdentDFA.Create(InputString: PAnsiChar; UseCaseSense: boolean = True);
 var
   c: TAnsiChar;
 begin
@@ -568,6 +554,28 @@ begin
     '7', '8', '9', '_']);
   AddToFinalState(1);
   FTransitions.Transition[1, '.'] := 2;
+end;
+
+{ TBlankDFA }
+
+function TBlankDFA.GetToken: TLexTok;
+begin
+  Result := inherited GetToken;
+  Result.Token := tkBlank;
+end;
+
+constructor TBlankDFA.Create(InputString: PAnsiChar; UseCaseSense: boolean = True);
+var
+  c: TAnsiChar;
+begin
+  inherited Create(InputString, UseCaseSense);
+  FTransitions.SetStateCount(2);
+  for c in [#1..#32] do
+  begin
+    FTransitions.Transition[0, c] := 1;
+    FTransitions.Transition[1, c] := 1;
+  end;
+  AddToFinalState(1);
 end;
 
 end.
