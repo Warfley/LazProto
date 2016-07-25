@@ -384,8 +384,11 @@ begin
     FCurrentState := -1;
   end
   else if FPosition^ = '"' then
+  begin
     Result := dsFinal;
-  Inc(FLength);
+    FCurrentState:=-1;
+	end;
+	Inc(FLength);
   Inc(FPosition);
 end;
 
@@ -465,8 +468,8 @@ begin
   // +/-
   FTransitions.Transition[6, '0'] := 2;
   // Oct
-  FTransitions.AddTransition(2, 3, ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']);
-  FTransitions.AddTransition(3, 3, ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']);
+  FTransitions.AddTransition(2, 3, ['0', '1', '2', '3', '4', '5', '6', '7']);
+  FTransitions.AddTransition(3, 3, ['0', '1', '2', '3', '4', '5', '6', '7']);
   AddToFinalState(3);
   // Hex
   FTransitions.Transition[2, 'x'] := 4;

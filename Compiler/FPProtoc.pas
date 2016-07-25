@@ -13,12 +13,17 @@ uses
 type
 
   { TProtocApp }
+  ECompilerException = Exception;
 
   TProtocApp = class(TCustomApplication)
   protected
+    FInputString: AnsiString;
     procedure DoRun; override;
     procedure WriteHeader(vd: TVersionData);
+    procedure LexerFoundTok(Sender: TObject; Tok: TLexTok);
+    procedure StartLexer(inFile: String);
   public
+    procedure ExceptionFound (Sender : TObject; E : Exception);
     constructor Create(TheOwner: TComponent); override;
     destructor Destroy; override;
     procedure WriteHelp; virtual;
@@ -26,6 +31,18 @@ type
 
   { TProtocApp }
 
+    procedure TProtocApp.ExceptionFound (Sender : TObject; E : Exception);
+    begin
+      TextColor(Red);
+      Write('Error: ');
+      TextColor(LightGray);
+      WriteLn(E.Message);
+		end;
+
+    procedure TProtocApp.LexerFoundTok(Sender: TObject; Tok: TLexTok);
+    begin
+      WriteLn('Token found (', tok.Token,', ', Copy(Tok.Start, 1, Tok.Len),')');
+		end;
 
     procedure TProtocApp.WriteHeader(vd: TVersionData);
     begin
@@ -34,6 +51,32 @@ type
       WriteLn(vd.FileDescription);
       WriteLn;
     end;
+
+    procedure TProtocApp.StartLexer(inFile: String);
+    var lex: TLexer;
+      sl: TStringList;
+    begin
+      WriteLn('Initializing Lexer, building DFA');
+      lex:=TLexer.Create;
+      try
+        if not FileExists(inFile) then
+          raise EFilerError.Create('Input File not found');
+        WriteLn('Loading File: ', inFile);
+        sl:=TStringList.Create;
+        try
+          sl.LoadFromFile(inFile);
+          FInputString:=sl.Text;
+				finally
+          sl.Free;
+				end;
+				lex.Head:=PAnsiChar(FInputString);
+        lex.OnTokenFound:=@LexerFoundTok;
+        WriteLn('Starting lexical analysis');
+        Lex.Run;
+			finally
+        lex.Free;
+			end;
+		end;
 
   procedure TProtocApp.DoRun;
   var
@@ -45,16 +88,13 @@ type
     ErrorMsg := CheckOptions('i:o:l:xpg:h', ['input:', 'output:', 'library:','lex','parse','log:','help']);
     if ErrorMsg <> '' then
     begin
-      TextColor(Red);
-      Write('Error: ');
-      TextColor(LightGray);
-      WriteLn(ErrorMsg);
+      raise ECompilerException.Create(ErrorMsg);
       Terminate;
       Exit;
     end;
 
     // parse parameters
-    if HasOption('h', 'help') or (ParamCount=0) then
+    if HasOption('h', 'help') and (ParamCount>0) then
     begin
       WriteHelp;
       Terminate;
@@ -62,7 +102,12 @@ type
     end;
 
     //if not HasOption('i', 'input');
+    if not (HasOption('i', 'input') and HasOption('o', 'output')) then
+      raise ECompilerException.Create('Parameter --input (-i) and --output (-o)'
+            +' are missing.'+LineEnding+'Check --help for more information');
 
+    if HasOption('x', 'lex') or not HasOption('p', 'parse');
+       StartLexer(GetOptionValue('i', 'input'));
 
     // stop program loop
     Terminate;
@@ -99,6 +144,7 @@ var
 begin
   Application := TProtocApp.Create(nil);
   Application.Title := 'Protobuf Compiler';
+  Application.OnException:=@Application.ExceptionFound;
   Application.Run;
   Application.Free;
 end.
