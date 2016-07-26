@@ -170,7 +170,7 @@ begin
     exit;
   if not CaseSense and (Input in ['A'..'Z']) then
     Input := chr(Ord(Input) - Ord('A') + Ord('a'));
-  m := Max(StartState, SinkState);
+  m := Max(StartState, NewState);
   if m >= Length(FTransitions) then
     SetStateCount(m + 1);
   FTransitions[StartState, Ord(Input)] := NewState;
@@ -216,7 +216,7 @@ begin
     exit;
   m := Max(StartState, EndState);
   if m >= Length(FTransitions) then
-    SetStateCount(m);
+    SetStateCount(m + 1);
   for c in Input do
     if not CaseSense and (c in ['A'..'Z']) then
       FTransitions[StartState, Ord(c) - Ord('A') + Ord('a')] := EndState
@@ -339,6 +339,16 @@ begin
     begin
       Result.Token := tkParenthesis;
       Result.Attr := 1; // closed
+    end;   
+    '[':
+    begin
+      Result.Token := tkBracket;
+      Result.Attr := 0; // opend
+    end;
+    ']':
+    begin
+      Result.Token := tkBracket;
+      Result.Attr := 1; // closed
     end;
     '{':
     begin
@@ -351,14 +361,16 @@ begin
       Result.Attr := 1; // closed
     end;
     '=': Result.Token := tkAssign;
-    ';': Result.Token := tkEmpty;
+    ';': Result.Token := tkSemicolon;
+    ',': Result.Token:=tkComma;
   end;
 end;
 
 constructor TSymbolDFA.Create(InputString: PAnsiChar; UseCaseSense: boolean = True);
 begin
   inherited Create(InputString, UseCaseSense);
-  FTransitions.AddTransition(0, 1, ['<', '>', '(', ')', '{', '}', ';', '=']);
+  FTransitions.SetStateCount(2);
+  FTransitions.AddTransition(0, 1, ['<', '>', '(', ')', '{', '}', ';', '=', ',']);
   AddToFinalState(1);
 end;
 
@@ -467,6 +479,7 @@ begin
   FTransitions.Transition[0, '0'] := 2;
   // +/-
   FTransitions.Transition[6, '0'] := 2;
+  AddToFinalState(2);
   // Oct
   FTransitions.AddTransition(2, 3, ['0', '1', '2', '3', '4', '5', '6', '7']);
   FTransitions.AddTransition(3, 3, ['0', '1', '2', '3', '4', '5', '6', '7']);
@@ -553,6 +566,7 @@ begin
     FTransitions.Transition[1, c] := 1;
     FTransitions.Transition[2, c] := 1;
   end;
+  FTransitions.Transition[0, '.'] := 1;
   FTransitions.AddTransition(1, 1, ['0', '1', '2', '3', '4', '5', '6',
     '7', '8', '9', '_']);
   AddToFinalState(1);
