@@ -8,9 +8,19 @@ uses
   Classes, gvector;
 
 type
-  // Terminal and non terminal symbols for DTA, 32768 each
-  TNonTerminal = 0..32767;
-  TTerminal = 32768..65535;
+  // Terminal and non terminal symbols for DTA, Sizeof(Pointer)*8-1 Bit
+  // First bit to determine if its TS(1) or NTS(0)
+  PPushDownAlpha = ^TPushDownAlpha;
+  TPushDownAlpha = UIntPtr;
+
+{$ifdef CPU64}    
+  TNonTerminal = 0..$7FFFFFFFFFFFFFFF;
+  TTerminal = $8000000000000000..$FFFFFFFFFFFFFFFF;
+{$EndIf}
+{$ifdef CPU32}
+  TNonTerminal = 0..$7FFFFFFF;
+  TTerminal = $80000000..$FFFFFFFF;
+{$EndIf}
 
     {TODO: Add NonTerminal Constants}
 
@@ -40,20 +50,41 @@ type
   TLexOut = specialize TVector<TLexTok>;
 
 function GetTerminal(Tok: TToken): TTerminal; inline;
-function isTerminal(val: Word): WordBool; inline;
+
+{$ifdef CPU64}
+function isTerminal(val: TPushDownAlpha): QWordBool; inline; 
+{$EndIf}
+{$ifdef CPU32}
+function isTerminal(val: TPushDownAlpha): LongBool; inline;
+{$EndIf}
 
 const
-  Epsilon: Word = Word(-1);
+  Epsilon: TPushDownAlpha = TPushDownAlpha(-1);
 implementation
 
 function GetTerminal(Tok: TToken): TTerminal;
 begin
-  Result:=ord(Tok) or -32768;
+{$ifdef CPU64}
+  Result:=ord(Tok) or $8000000000000000;  
+{$EndIf}
+{$ifdef CPU32}
+  Result:=ord(Tok) or $80000000;
+{$EndIf}
 end;
 
-function isTerminal(val: Word): WordBool;
+{$ifdef CPU64}
+function isTerminal(val: TPushDownAlpha): QWordBool; inline;   
+{$EndIf}
+{$ifdef CPU32}
+function isTerminal(val: TPushDownAlpha): LongBool; inline;
+{$EndIf}
 begin
-  Result:=WordBool(val and -32768);
+{$ifdef CPU64}
+  Result:=QWordBool(val and $8000000000000000);    
+{$EndIf}
+{$ifdef CPU32}
+  Result:=QWordBool(val and $80000000);
+{$EndIf}
 end;
 
 end.

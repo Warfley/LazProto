@@ -101,7 +101,15 @@ type
   procedure TProtocApp.DoRun;
   var
     ErrorMsg: string;
+    c: TCFG;
   begin
+    c.Create;
+    try
+      c.AddRules(0, TRuleDataArray.Create(TRuleData.Create(1,2,3)));
+      WriteLn(Length(c.FindRule(TRuleData.Create(1,2,3))));
+    finally
+      c.Free;
+    end;
     CaseSensitiveOptions := False;
     WriteHeader(GetVersionData(ExeName));
     // quick check parameters
