@@ -11,15 +11,15 @@ type
   // Terminal and non terminal symbols for DTA, Sizeof(Pointer)*8-1 Bit
   // First bit to determine if its TS(1) or NTS(0)
   PPushDownAlpha = ^TPushDownAlpha;
-  TPushDownAlpha = UIntPtr;
+  TPushDownAlpha = IntPtr;
 
 {$ifdef CPU64}    
   TNonTerminal = 0..$7FFFFFFFFFFFFFFF;
-  TTerminal = $8000000000000000..$FFFFFFFFFFFFFFFF;
+  TTerminal = IntPtr($8000000000000000)..IntPtr($FFFFFFFFFFFFFFFF);
 {$EndIf}
 {$ifdef CPU32}
   TNonTerminal = 0..$7FFFFFFF;
-  TTerminal = $80000000..$FFFFFFFF;
+  TTerminal = IntPtr($80000000)..IntPtr($FFFFFFFF);
 {$EndIf}
 
     {TODO: Add NonTerminal Constants}
@@ -56,7 +56,8 @@ function isTerminal(val: TPushDownAlpha): QWordBool; inline;
 {$EndIf}
 {$ifdef CPU32}
 function isTerminal(val: TPushDownAlpha): LongBool; inline;
-{$EndIf}
+{$EndIf} 
+function GetToken(val: TTerminal): TToken;
 
 const
   Epsilon: TPushDownAlpha = TPushDownAlpha(-1);
@@ -65,10 +66,20 @@ implementation
 function GetTerminal(Tok: TToken): TTerminal;
 begin
 {$ifdef CPU64}
-  Result:=ord(Tok) or $8000000000000000;  
+  Result:=ord(Tok) or IntPtr($8000000000000000);  
 {$EndIf}
 {$ifdef CPU32}
-  Result:=ord(Tok) or $80000000;
+  Result:=ord(Tok) or IntPtr($80000000);
+{$EndIf}
+end;
+
+function GetToken(val: TTerminal): TToken;
+begin
+{$ifdef CPU64}
+  Result:=TToken(val and not $8000000000000000);
+{$EndIf}
+{$ifdef CPU32}
+  Result:=TToken(val and not $80000000);
 {$EndIf}
 end;
 

@@ -8,7 +8,8 @@ uses
   Lexer,
   DFA,
   CompUtils,
-  Crt, CFG;
+  Crt,
+  CFG;
 
 type
 
@@ -39,21 +40,22 @@ type
     if HasOption('w', 'wait') then
       ReadKey;
     inherited;
-	end;
+  end;
 
   procedure TProtocApp.ExceptionFound(Sender: TObject; E: Exception);
   begin
     TextColor(Red);
     Write('Error: ');
     TextColor(LightGray);
-    WriteLn(E.Message);  
+    WriteLn(E.Message);
     if HasOption('w', 'wait') then
       ReadKey;
   end;
 
   procedure TProtocApp.LexerFoundTok(Sender: TObject; Tok: TLexTok);
   begin
-    if Tok.Token=tkBlank then Exit;
+    if Tok.Token = tkBlank then
+      Exit;
     if FDebugMode then
       WriteLn('Token found (', tok.Token, ', ', Copy(Tok.Start, 1, Tok.Len), ')');
     FLexOutput.PushBack(Tok);
@@ -76,7 +78,7 @@ type
     sl: TStringList;
   begin
     if FDebugMode then
-    WriteLn('Initializing Lexer, building DFA');
+      WriteLn('Initializing Lexer, building DFA');
     lex := TLexer.Create;
     try
       if not FileExists(inFile) then
@@ -101,15 +103,7 @@ type
   procedure TProtocApp.DoRun;
   var
     ErrorMsg: string;
-    c: TCFG;
   begin
-    c.Create;
-    try
-      c.AddRules(0, TRuleDataArray.Create(TRuleData.Create(1,2,3)));
-      WriteLn(Length(c.FindRule(TRuleData.Create(1,2,3))));
-    finally
-      c.Free;
-    end;
     CaseSensitiveOptions := False;
     WriteHeader(GetVersionData(ExeName));
     // quick check parameters
@@ -134,8 +128,8 @@ type
 
     //if not HasOption('i', 'input');
     if not (HasOption('i', 'input') and HasOption('o', 'output')) then
-      raise ECompilerException.Create('Parameter --input (-i) and --output (-o)'
-        + ' are missing.' + LineEnding + 'Check --help for more information');
+      raise ECompilerException.Create('Parameter --input (-i) and --output (-o)' +
+        ' are missing.' + LineEnding + 'Check --help for more information');
     FLexOutput := TLexOut.Create;
     try
       StartLexer(GetOptionValue('i', 'input'));
@@ -143,8 +137,8 @@ type
       FLexOutput.Free;
     end;
 
-    // stop program loop    
-      WriteLn('Finished');
+    // stop program loop
+    WriteLn('Finished');
     Terminate;
   end;
 
