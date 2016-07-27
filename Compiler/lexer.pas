@@ -86,7 +86,7 @@ begin
     BackTrack
   else
     raise ELexException.Create('Unexpected EOF');
-  t.Token := tkEOF;
+  t.Token := Ord(tkEOF);
   t.Len := 0;
   t.Start := nil;
   t.Attr := 0;

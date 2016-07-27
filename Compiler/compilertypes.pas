@@ -8,20 +8,6 @@ uses
   Classes, gvector;
 
 type
-  // Terminal and non terminal symbols for DTA, Sizeof(Pointer)*8-1 Bit
-  // First bit to determine if its TS(1) or NTS(0)
-  PPushDownAlpha = ^TPushDownAlpha;
-  TPushDownAlpha = IntPtr;
-
-{$ifdef CPU64}    
-  TNonTerminal = 0..$7FFFFFFFFFFFFFFF;
-  TTerminal = IntPtr($8000000000000000)..IntPtr($FFFFFFFFFFFFFFFF);
-{$EndIf}
-{$ifdef CPU32}
-  TNonTerminal = 0..$7FFFFFFF;
-  TTerminal = IntPtr($80000000)..IntPtr($FFFFFFFF);
-{$EndIf}
-
     {TODO: Add NonTerminal Constants}
 
   TToken = (
@@ -41,7 +27,7 @@ type
     tiBool, tiString, tiBytes);
 
   TLexTok = record
-    Token: TToken;
+    Token: IntPtr;
     Start: PAnsiChar;
     Len,
     Attr: IntPtr;
@@ -49,53 +35,6 @@ type
 
   TLexOut = specialize TVector<TLexTok>;
 
-function GetTerminal(Tok: TToken): TTerminal; inline;
-
-{$ifdef CPU64}
-function isTerminal(val: TPushDownAlpha): QWordBool; inline; 
-{$EndIf}
-{$ifdef CPU32}
-function isTerminal(val: TPushDownAlpha): LongBool; inline;
-{$EndIf} 
-function GetToken(val: TTerminal): TToken;
-
-const
-  Epsilon: TPushDownAlpha = TPushDownAlpha(-1);
 implementation
-
-function GetTerminal(Tok: TToken): TTerminal;
-begin
-{$ifdef CPU64}
-  Result:=ord(Tok) or IntPtr($8000000000000000);  
-{$EndIf}
-{$ifdef CPU32}
-  Result:=ord(Tok) or IntPtr($80000000);
-{$EndIf}
-end;
-
-function GetToken(val: TTerminal): TToken;
-begin
-{$ifdef CPU64}
-  Result:=TToken(val and not $8000000000000000);
-{$EndIf}
-{$ifdef CPU32}
-  Result:=TToken(val and not $80000000);
-{$EndIf}
-end;
-
-{$ifdef CPU64}
-function isTerminal(val: TPushDownAlpha): QWordBool; inline;   
-{$EndIf}
-{$ifdef CPU32}
-function isTerminal(val: TPushDownAlpha): LongBool; inline;
-{$EndIf}
-begin
-{$ifdef CPU64}
-  Result:=QWordBool(val and $8000000000000000);    
-{$EndIf}
-{$ifdef CPU32}
-  Result:=QWordBool(val and $80000000);
-{$EndIf}
-end;
 
 end.

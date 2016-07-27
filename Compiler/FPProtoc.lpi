@@ -90,7 +90,7 @@
         <CommandLineParams Value="-i &quot;C:/Users/Frederic/Documents/Projects/pokemonGO/POGOProtos/src/POGOProtos/Inventory/InventoryItemData.proto&quot; -o &quot;Pimmel&quot; -w -d"/>
       </local>
     </RunParams>
-    <Units Count="6">
+    <Units Count="5">
       <Unit0>
         <Filename Value="FPProtoc.pas"/>
         <IsPartOfProject Value="True"/>
@@ -115,11 +115,6 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="CompUtils"/>
       </Unit4>
-      <Unit5>
-        <Filename Value="cfg.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="CFG"/>
-      </Unit5>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

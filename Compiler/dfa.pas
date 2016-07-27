@@ -245,7 +245,7 @@ end;
 function TDFA.GetToken: TLexTok;
 begin
   Result.Attr := 0;
-  Result.Token := tkIdent;
+  Result.Token := Ord(tkIdent);
   Result.Len := FLength;
   Result.Start := FPosition - FLength;
 end;
@@ -298,7 +298,7 @@ end;
 function TKeywordDFA.GetToken: TLexTok;
 begin
   Result := inherited GetToken;
-  Result.Token := FTok;
+  Result.Token := Ord(FTok);
   Result.Attr := FAttr;
 end;
 
@@ -322,47 +322,47 @@ begin
   case Result.Start^ of
     '<':
     begin
-      Result.Token := tkAngleBracket;
+      Result.Token := Ord(tkAngleBracket);
       Result.Attr := 0; // opend
     end;
     '>':
     begin
-      Result.Token := tkAngleBracket;
+      Result.Token := Ord(tkAngleBracket);
       Result.Attr := 1; // closed
     end;
     '(':
     begin
-      Result.Token := tkParenthesis;
+      Result.Token := Ord(tkParenthesis);
       Result.Attr := 0; // opend
     end;
     ')':
     begin
-      Result.Token := tkParenthesis;
+      Result.Token := Ord(tkParenthesis);
       Result.Attr := 1; // closed
     end;   
     '[':
     begin
-      Result.Token := tkBracket;
+      Result.Token := Ord(tkBracket);
       Result.Attr := 0; // opend
     end;
     ']':
     begin
-      Result.Token := tkBracket;
+      Result.Token := Ord(tkBracket);
       Result.Attr := 1; // closed
     end;
     '{':
     begin
-      Result.Token := tkBrace;
+      Result.Token := Ord(tkBrace);
       Result.Attr := 0; // opend
     end;
     '}':
     begin
-      Result.Token := tkBrace;
+      Result.Token := Ord(tkBrace);
       Result.Attr := 1; // closed
     end;
-    '=': Result.Token := tkAssign;
-    ';': Result.Token := tkSemicolon;
-    ',': Result.Token:=tkComma;
+    '=': Result.Token := Ord(tkAssign);
+    ';': Result.Token := Ord(tkSemicolon);
+    ',': Result.Token:=Ord(tkComma);
   end;
 end;
 
@@ -379,7 +379,7 @@ end;
 function TStringDFA.GetToken: TLexTok;
 begin
   Result := inherited GetToken;
-  Result.Token := tkStringConst;
+  Result.Token := Ord(tkStringConst);
 end;
 
 function TStringDFA.PerformStep: TDFAState;
@@ -409,7 +409,7 @@ end;
 function TBoolDFA.GetToken: TLexTok;
 begin
   Result := inherited GetToken;
-  Result.Token := tkBoolConst;
+  Result.Token := Ord(tkBoolConst);
 end;
 
 constructor TBoolDFA.Create(InputString: PAnsiChar; UseCaseSense: boolean = True);
@@ -443,7 +443,7 @@ var
   s: string;
 begin
   Result := inherited GetToken;
-  Result.Token := tkIntConst;
+  Result.Token := Ord(tkIntConst);
   if FOct then
   begin
     if Result.Start^ = '0' then
@@ -498,7 +498,7 @@ end;
 function TFloatDFA.GetToken: TLexTok;
 begin
   Result := inherited GetToken;
-  Result.Token := tkFloatConst;
+  Result.Token := Ord(tkFloatConst);
 end;
 
 constructor TFloatDFA.Create(InputString: PAnsiChar; UseCaseSense: boolean = True);
@@ -550,7 +550,7 @@ end;
 function TIdentDFA.GetToken: TLexTok;
 begin
   Result := inherited GetToken;
-  Result.Token := tkIdent;
+  Result.Token := Ord(tkIdent);
   Result.Attr := ifthen(Pos('.', Copy(Result.Start, 1, Result.Len)) > 0, 1, 0);
 end;
 
@@ -578,7 +578,7 @@ end;
 function TBlankDFA.GetToken: TLexTok;
 begin
   Result := inherited GetToken;
-  Result.Token := tkBlank;
+  Result.Token := Ord(tkBlank);
 end;
 
 constructor TBlankDFA.Create(InputString: PAnsiChar; UseCaseSense: boolean = True);

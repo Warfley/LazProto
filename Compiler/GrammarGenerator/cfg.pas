@@ -8,10 +8,24 @@ unit CFG;
 interface
 
 uses
-  Classes, SysUtils, CompilerTypes, Math, fgl, gvector;
+  Classes, SysUtils, Math, fgl, gvector;
 
 type
-  ECFGException = Exception;
+  ECFGException = Exception;  
+  // Terminal and non terminal symbols for DTA, Sizeof(Pointer)*8-1 Bit
+  // First bit to determine if its TS(1) or NTS(0)
+  PPushDownAlpha = ^TPushDownAlpha;
+  TPushDownAlpha = IntPtr;
+
+{$ifdef CPU64}
+  TNonTerminal = 0..$7FFFFFFFFFFFFFFF;
+  TTerminal = IntPtr($8000000000000000)..IntPtr($FFFFFFFFFFFFFFFF);
+{$EndIf}
+{$ifdef CPU32}
+  TNonTerminal = 0..$7FFFFFFF;
+  TTerminal = IntPtr($80000000)..IntPtr($FFFFFFFF);
+{$EndIf}
+
 
   // Rules are Encoded as array, for A -> B | CD it is
   // Rules[A] := [B, C, D], Length of each rule is stored seperately
@@ -51,7 +65,6 @@ type
   TCFG = class
   private
     FRules: array of TRule;
-    FNTSFi: array of TTerminalSet;
     FStart: TNonTerminal;
     function GetRules(a: TNonTerminal): TRule;
     function AddToSet(i: TPushDownAlpha; s: TTerminalSet): boolean;
@@ -69,12 +82,13 @@ type
     procedure Fi(inp: array of TPushDownAlpha; s: TTerminalSet);
     procedure Fo(inp: TNonTerminal; s: TTerminalSet);
     procedure ComputeLASets;
-    {TODO: Implement fi/fo/la Sets}
-    {TODO: Implement Checkrule}
-    {TODO: Implement GetAllRules}
+    procedure ClearLASets;
+    {Done: Implement fi/fo/la Sets}
     {TODO: Implement CheckLL1}
     {TODO: Implement CheckSLR0}
     {TODO: Implement SLR0 Sets}
+    {TODO: Save/Load Grammar}
+    {TODO: Create LR/LL Sheets}
 
     property Count: IntPtr read GetNTSCount write SetNTSCount;
     property Rules[Leftside: TNonTerminal]: TRule read GetRules; default;
@@ -86,9 +100,57 @@ function RulePos(NTM: TNonTerminal; Pos: IntPtr): TRulePos;
 function CompareRules(a, b: TRuleData): boolean; inline;
 function Concatinate(a, b: TRuleData): TRuleData;
 
-procedure WriteRule(k: integer; r: TRule);
+procedure WriteRule(k: integer; r: TRule);   
 
-implementation
+function GetTerminal(val: IntPtr): TTerminal; inline;
+
+{$ifdef CPU64}
+function isTerminal(val: TPushDownAlpha): QWordBool; inline;
+{$EndIf}
+{$ifdef CPU32}
+function isTerminal(val: TPushDownAlpha): LongBool; inline;
+{$EndIf}
+function TerminalToInt(val: TTerminal): IntPtr; inline;
+
+const
+  Epsilon: TPushDownAlpha = TPushDownAlpha(-1);
+
+implementation 
+
+function GetTerminal(val: IntPtr): TTerminal; inline;
+begin
+{$ifdef CPU64}
+  Result:=val or IntPtr($8000000000000000);
+{$EndIf}
+{$ifdef CPU32}
+  Result:=val or IntPtr($80000000);
+{$EndIf}
+end;
+
+function TerminalToInt(val: TTerminal): IntPtr; inline;
+begin
+{$ifdef CPU64}
+  Result:=val and not $8000000000000000;
+{$EndIf}
+{$ifdef CPU32}
+  Result:=val and not $80000000;
+{$EndIf}
+end;
+
+{$ifdef CPU64}
+function isTerminal(val: TPushDownAlpha): QWordBool; inline;
+{$EndIf}
+{$ifdef CPU32}
+function isTerminal(val: TPushDownAlpha): LongBool; inline;
+{$EndIf}
+begin
+{$ifdef CPU64}
+  Result:=QWordBool(val and $8000000000000000);
+{$EndIf}
+{$ifdef CPU32}
+  Result:=QWordBool(val and $80000000);
+{$EndIf}
+end;
 
 procedure WriteRule(k: integer; r: TRule);
 var
@@ -99,7 +161,7 @@ begin
     Write(k, ' -> ');
     for x := 0 to Length(r.Rule[i]) - 1 do
       if isTerminal(r.Rule[i][x]) then
-        Write('(', GetToken(r.Rule[i][x]), ')')
+        Write('(', GetTerminal(r.Rule[i][x]), ')')
       else
         Write('(', r.Rule[i][x], ')');
     WriteLn();
@@ -162,6 +224,15 @@ begin
 end;
 
 { TCFG }
+
+procedure TCFG.ClearLASets;
+var
+		c, i: IntPtr;
+begin
+  for i := 0 to Length(FLookAheadSet) - 1 do
+    for c := 0 to Length(FLookAheadSet[i]) - 1 do
+      FLookAheadSet[i, c].Free;
+end;
 
 procedure TCFG.SetNTSCount(c: IntPtr);
 var
@@ -347,13 +418,11 @@ end;
 
 destructor TCFG.Destroy;
 var
-  i, c: IntPtr;
+  i: IntPtr;
 begin
   for i := 0 to Length(FRules) - 1 do
     FRules[i].Free;
-  for i := 0 to Length(FLookAheadSet) - 1 do
-    for c := 0 to Length(FLookAheadSet[i]) - 1 do
-      FLookAheadSet[i, c].Free;
+  ClearLASets;
 end;
 
 procedure TCFG.AddRules(LeftSide: TNonTerminal; RightSide: array of TRuleData);

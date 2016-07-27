@@ -8,8 +8,7 @@ uses
   Lexer,
   DFA,
   CompUtils,
-  Crt,
-  CFG;
+  Crt;
 
 type
 
@@ -54,7 +53,7 @@ type
 
   procedure TProtocApp.LexerFoundTok(Sender: TObject; Tok: TLexTok);
   begin
-    if Tok.Token = tkBlank then
+    if Tok.Token = Ord(tkBlank) then
       Exit;
     if FDebugMode then
       WriteLn('Token found (', tok.Token, ', ', Copy(Tok.Start, 1, Tok.Len), ')');
