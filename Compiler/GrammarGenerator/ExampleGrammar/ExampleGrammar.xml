@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CFG Count="5" Start="0">
+  <Rules NTM="0">
+    <Rule>
+      <Item Value="2" Terminal="False"/>
+      <Item Value="1" Terminal="False"/>
+    </Rule>
+  </Rules>
+  <Rules NTM="1">
+    <Rule>
+      <Item Value="0" Terminal="True"/>
+      <Item Value="2" Terminal="False"/>
+      <Item Value="1" Terminal="False"/>
+    </Rule>
+    <Rule/>
+  </Rules>
+  <Rules NTM="2">
+    <Rule>
+      <Item Value="4" Terminal="True"/>
+      <Item Value="3" Terminal="False"/>
+    </Rule>
+  </Rules>
+  <Rules NTM="3">
+    <Rule>
+      <Item Value="1" Terminal="True"/>
+      <Item Value="4" Terminal="False"/>
+      <Item Value="3" Terminal="False"/>
+    </Rule>
+    <Rule/>
+  </Rules>
+  <Rules NTM="4">
+    <Rule>
+      <Item Value="2" Terminal="True"/>
+      <Item Value="0" Terminal="False"/>
+      <Item Value="3" Terminal="True"/>
+    </Rule>
+    <Rule>
+      <Item Value="4" Terminal="True"/>
+    </Rule>
+    <Rule>
+      <Item Value="5" Terminal="True"/>
+    </Rule>
+  </Rules>
+</CFG>

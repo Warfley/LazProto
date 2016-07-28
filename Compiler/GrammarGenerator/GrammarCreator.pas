@@ -40,8 +40,6 @@ type
   var
     ErrorMsg: string;
   begin
-    WriteHeader(GetVersionData(ExeName));
-    CaseSensitiveOptions:=False;
     // quick check parameters
     ErrorMsg := CheckOptions('hi:o:lr', ['help', 'input', 'output', 'LL1', 'LR1']);
     if ErrorMsg <> '' then

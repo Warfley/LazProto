@@ -8,7 +8,7 @@ unit CFG;
 interface
 
 uses
-  Classes, SysUtils, Math, fgl, gvector;
+  Classes, SysUtils, Math, fgl, gvector, DOM, XMLRead, XMLWrite;
 
 type
   ECFGException = Exception;  
@@ -83,12 +83,15 @@ type
     procedure Fo(inp: TNonTerminal; s: TTerminalSet);
     procedure ComputeLASets;
     procedure ClearLASets;
+    procedure SaveToFile(f: TFilename);
+    procedure LoadFromFile(f: TFilename);
     {Done: Implement fi/fo/la Sets}
     {TODO: Implement CheckLL1}
     {TODO: Implement CheckSLR0}
     {TODO: Implement SLR0 Sets}
-    {TODO: Save/Load Grammar}
-    {TODO: Create LR/LL Sheets}
+    {DONE: Save/Load Grammar}
+    {TODO: Exporter}
+    {TODO: Create Recursive Descendence Parser}
 
     property Count: IntPtr read GetNTSCount write SetNTSCount;
     property Rules[Leftside: TNonTerminal]: TRule read GetRules; default;
@@ -152,23 +155,6 @@ begin
 {$EndIf}
 end;
 
-procedure WriteRule(k: integer; r: TRule);
-var
-  i, x: integer;
-begin
-  for i := 0 to r.Count - 1 do
-  begin
-    Write(k, ' -> ');
-    for x := 0 to Length(r.Rule[i]) - 1 do
-      if isTerminal(r.Rule[i][x]) then
-        Write('(', GetTerminal(r.Rule[i][x]), ')')
-      else
-        Write('(', r.Rule[i][x], ')');
-    WriteLn();
-  end;
-
-end;
-
 function Concatinate(a, b: TRuleData): TRuleData;
 begin
   SetLength(Result, Length(a) + Length(b));
@@ -224,6 +210,79 @@ begin
 end;
 
 { TCFG }
+
+procedure TCFG.SaveToFile(f: TFilename);
+var
+  doc: TXMLDocument;
+  NTMNode, ruleNode, elemNode: TDOMNode;
+  i,c: Integer;
+  v: TPushDownAlpha;
+begin
+  doc:=TXMLDocument.Create;
+  try
+    doc.AppendChild(doc.CreateElement('CFG'));
+    TDOMElement(doc.DocumentElement).SetAttribute('Count', IntToStr(Length(FRules)));  
+    TDOMElement(doc.DocumentElement).SetAttribute('Start', IntToStr(FStart));
+    for i:=0 to Length(FRules)-1 do
+    begin
+      NTMNode:=doc.CreateElement('Rules');
+      doc.DocumentElement.AppendChild(NTMNode);
+      TDOMElement(NTMNode).SetAttribute('NTM', IntToStr(i));
+      for c:=0 to FRules[i].Count-1 do
+      begin
+        ruleNode:=doc.CreateElement('Rule');
+        NTMNode.AppendChild(ruleNode);
+        for v in FRules[i].Rule[c] do
+        begin
+          elemNode:=doc.CreateElement('Item');
+          ruleNode.AppendChild(elemNode);
+				  TDOMElement(elemNode).SetAttribute('Terminal', BoolToStr(isTerminal(v), True));
+				  TDOMElement(elemNode).SetAttribute('Value', IntToStr(ifthen(isTerminal(v), TerminalToInt(v), v)));
+				end;
+			end;
+		end;
+    WriteXML(doc, f);
+	finally
+    doc.Free;
+	end;
+end;
+
+procedure TCFG.LoadFromFile(f: TFilename);
+var
+  newRules: TRuleDataArray;
+  doc: TXMLDocument;
+  NTMNode, ruleNode, elemNode: TDOMNode;
+  i, c, k: Integer;
+  NTM, tmp: TPushDownAlpha;
+begin
+  ReadXMLFile(doc, f);
+  try
+    Count:=StrToInt(doc.DocumentElement.GetAttribute('Count'));
+    FStart:=StrToInt(doc.DocumentElement.GetAttribute('Start'));
+    for i:=0 to doc.DocumentElement.ChildNodes.Count-1 do
+    begin
+      NTMNode:=doc.DocumentElement.ChildNodes[i];
+      NTM:=StrToInt(TDOMElement(NTMNode).GetAttribute('NTM'));
+      SetLength(newRules, NTMNode.ChildNodes.Count);
+      for c:=0 to Length(newRules)-1 do
+      begin
+        ruleNode:=NTMNode.ChildNodes[c];
+        SetLength(newRules[c], ruleNode.ChildNodes.Count);
+        for k:=0 to Length(newRules[c])-1 do
+        begin
+          elemNode:=ruleNode.ChildNodes[k];
+          tmp:=StrToInt(TDOMElement(elemNode).GetAttribute('Value'));
+          if TDOMElement(elemNode).GetAttribute('Terminal') =  'True' then
+            tmp:=GetTerminal(tmp);
+          newRules[c][k]:=tmp;
+				end;
+			end;
+      AddRules(NTM, newRules);
+		end;
+	finally
+    doc.Free;
+  end;
+end;
 
 procedure TCFG.ClearLASets;
 var

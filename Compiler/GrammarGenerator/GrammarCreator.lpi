@@ -16,7 +16,7 @@
     <VersionInfo>
       <UseVersionInfo Value="True"/>
       <AutoIncrementBuild Value="True"/>
-      <StringTable FileDescription="Grammar Creator for LL1 or (S/LA)LR1 Parsing" LegalCopyright="Copyright (c) Frederic Kehrein 2016" ProductName="CFGrammar Creator" ProductVersion="v1"/>
+      <StringTable FileDescription="Grammar Creator for LL1 and (S/LA)LR1 Parsing" LegalCopyright="Copyright (c) Frederic Kehrein 2016" ProductName="CFGrammar Creator" ProductVersion="v1"/>
     </VersionInfo>
     <BuildModes Count="1">
       <Item1 Name="Default" Default="True"/>
