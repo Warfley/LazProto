@@ -1,0 +1,166 @@
+object Form1: TForm1
+  Left = 0
+  Height = 317
+  Top = 0
+  Width = 568
+  Align = alBottom
+  Caption = 'Form1'
+  ClientHeight = 317
+  ClientWidth = 568
+  LCLVersion = '1.7'
+  Visible = False
+  object TerminalGroup: TGroupBox
+    Left = 0
+    Height = 280
+    Top = 0
+    Width = 277
+    Align = alLeft
+    Caption = 'Terminals'
+    ClientHeight = 258
+    ClientWidth = 269
+    TabOrder = 0
+    object TerminalBox: TListBox
+      Left = 0
+      Height = 236
+      Top = 0
+      Width = 269
+      Align = alClient
+      ItemHeight = 0
+      TabOrder = 0
+    end
+    object Panel2: TPanel
+      Left = 0
+      Height = 22
+      Top = 236
+      Width = 269
+      Align = alBottom
+      BevelOuter = bvNone
+      ClientHeight = 22
+      ClientWidth = 269
+      TabOrder = 1
+      object TerminalAdd: TButton
+        Left = 224
+        Height = 22
+        Top = 0
+        Width = 45
+        Align = alRight
+        Caption = '+'
+        Font.Color = clLime
+        OnClick = TerminalAddClick
+        ParentFont = False
+        TabOrder = 0
+      end
+      object TerminalDelete: TButton
+        Left = 179
+        Height = 22
+        Top = 0
+        Width = 45
+        Align = alRight
+        Caption = '-'
+        Font.Color = clRed
+        OnClick = TerminalDeleteClick
+        ParentFont = False
+        TabOrder = 1
+      end
+      object TerminalEdit: TEdit
+        Left = 0
+        Height = 22
+        Top = 0
+        Width = 179
+        Align = alClient
+        OnEnter = TerminalEditEnter
+        TabOrder = 2
+      end
+    end
+  end
+  object Splitter1: TSplitter
+    Left = 277
+    Height = 280
+    Top = 0
+    Width = 5
+  end
+  object Panel1: TPanel
+    Left = 0
+    Height = 37
+    Top = 280
+    Width = 568
+    Align = alBottom
+    BevelOuter = bvNone
+    ClientHeight = 37
+    ClientWidth = 568
+    TabOrder = 2
+    object Button1: TButton
+      Left = 0
+      Height = 37
+      Top = 0
+      Width = 568
+      Align = alClient
+      Caption = 'Next: Rules'
+      TabOrder = 0
+    end
+  end
+  object NonTerminalGroup: TGroupBox
+    Left = 282
+    Height = 280
+    Top = 0
+    Width = 286
+    Align = alClient
+    Caption = 'Non Terminals'
+    ClientHeight = 258
+    ClientWidth = 278
+    TabOrder = 3
+    object NonTerminalBox: TListBox
+      Left = 0
+      Height = 236
+      Top = 0
+      Width = 278
+      Align = alClient
+      ItemHeight = 0
+      TabOrder = 0
+    end
+    object Panel3: TPanel
+      Left = 0
+      Height = 22
+      Top = 236
+      Width = 278
+      Align = alBottom
+      BevelOuter = bvNone
+      ClientHeight = 22
+      ClientWidth = 278
+      TabOrder = 1
+      object NonTerminalAdd: TButton
+        Left = 233
+        Height = 22
+        Top = 0
+        Width = 45
+        Align = alRight
+        Caption = '+'
+        Font.Color = clLime
+        OnClick = NonTerminalAddClick
+        ParentFont = False
+        TabOrder = 0
+      end
+      object NonTerminalDelete: TButton
+        Left = 188
+        Height = 22
+        Top = 0
+        Width = 45
+        Align = alRight
+        Caption = '-'
+        Font.Color = clRed
+        OnClick = NonTerminalDeleteClick
+        ParentFont = False
+        TabOrder = 1
+      end
+      object NonTerminalEdit: TEdit
+        Left = 0
+        Height = 22
+        Top = 0
+        Width = 188
+        Align = alClient
+        OnEnter = TerminalEditEnter
+        TabOrder = 2
+      end
+    end
+  end
+end
