@@ -35,5 +35,7 @@ implementation
 
 {$R *.lfm}
 
+{ TForm2 }
+
 end.
 
