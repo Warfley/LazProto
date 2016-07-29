@@ -103,8 +103,6 @@ function RulePos(NTM: TNonTerminal; Pos: IntPtr): TRulePos;
 function CompareRules(a, b: TRuleData): boolean; inline;
 function Concatinate(a, b: TRuleData): TRuleData;
 
-procedure WriteRule(k: integer; r: TRule);   
-
 function GetTerminal(val: IntPtr): TTerminal; inline;
 
 {$ifdef CPU64}

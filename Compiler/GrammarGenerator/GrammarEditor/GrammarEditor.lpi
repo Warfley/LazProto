@@ -29,7 +29,7 @@
         <PackageName Value="LCL"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="3">
+    <Units Count="5">
       <Unit0>
         <Filename Value="GrammarEditor.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -37,7 +37,7 @@
       <Unit1>
         <Filename Value="symbolform.pas"/>
         <IsPartOfProject Value="True"/>
-        <ComponentName Value="Form1"/>
+        <ComponentName Value="Mainform"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="SymbolForm"/>
@@ -45,11 +45,24 @@
       <Unit2>
         <Filename Value="ruleeditor.pas"/>
         <IsPartOfProject Value="True"/>
-        <ComponentName Value="Form2"/>
+        <ComponentName Value="RuleEditForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="RuleEditor"/>
       </Unit2>
+      <Unit3>
+        <Filename Value="../cfg.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CFG"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="startselector.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="StartSelectForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="StartSelector"/>
+      </Unit4>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -59,6 +72,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
+      <OtherUnitFiles Value=".."/>
       <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Linking>

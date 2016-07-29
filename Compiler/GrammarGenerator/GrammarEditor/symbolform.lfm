@@ -1,27 +1,29 @@
-object Form1: TForm1
-  Left = 0
-  Height = 317
-  Top = 0
-  Width = 568
+object Mainform: TMainform
+  Left = 200
+  Height = 537
+  Top = 200
+  Width = 555
   ActiveControl = TerminalBox
   Align = alBottom
-  Caption = 'Form1'
-  ClientHeight = 317
-  ClientWidth = 568
+  Caption = 'Symbol editor'
+  ClientHeight = 537
+  ClientWidth = 555
+  OnShow = FormShow
+  Position = poScreenCenter
   Visible = False
   object TerminalGroup: TGroupBox
     Left = 0
-    Height = 280
+    Height = 500
     Top = 0
     Width = 277
     Align = alLeft
     Caption = 'Terminals'
-    ClientHeight = 250
+    ClientHeight = 470
     ClientWidth = 273
     TabOrder = 0
     object TerminalBox: TListBox
       Left = 0
-      Height = 228
+      Height = 432
       Top = 0
       Width = 273
       Align = alClient
@@ -30,17 +32,17 @@ object Form1: TForm1
     end
     object Panel2: TPanel
       Left = 0
-      Height = 22
-      Top = 228
+      Height = 38
+      Top = 432
       Width = 273
       Align = alBottom
       BevelOuter = bvNone
-      ClientHeight = 22
+      ClientHeight = 38
       ClientWidth = 273
       TabOrder = 1
       object TerminalAdd: TButton
         Left = 228
-        Height = 22
+        Height = 38
         Top = 0
         Width = 45
         Align = alRight
@@ -48,11 +50,11 @@ object Form1: TForm1
         Font.Color = clLime
         OnClick = TerminalAddClick
         ParentFont = False
-        TabOrder = 0
+        TabOrder = 1
       end
       object TerminalDelete: TButton
         Left = 183
-        Height = 22
+        Height = 38
         Top = 0
         Width = 45
         Align = alRight
@@ -60,77 +62,80 @@ object Form1: TForm1
         Font.Color = clRed
         OnClick = TerminalDeleteClick
         ParentFont = False
-        TabOrder = 1
+        TabOrder = 2
       end
       object TerminalEdit: TEdit
         Left = 0
-        Height = 22
+        Height = 38
         Top = 0
         Width = 183
         Align = alClient
         OnEnter = TerminalEditEnter
-        TabOrder = 2
+        OnKeyDown = TerminalEditKeyDown
+        OnKeyUp = TerminalEditKeyUp
+        TabOrder = 0
       end
     end
   end
   object Splitter1: TSplitter
     Left = 277
-    Height = 280
+    Height = 500
     Top = 0
     Width = 5
   end
   object Panel1: TPanel
     Left = 0
     Height = 37
-    Top = 280
-    Width = 568
+    Top = 500
+    Width = 555
     Align = alBottom
     BevelOuter = bvNone
     ClientHeight = 37
-    ClientWidth = 568
-    TabOrder = 2
+    ClientWidth = 555
+    TabOrder = 3
     object Button1: TButton
       Left = 0
       Height = 37
       Top = 0
-      Width = 568
+      Width = 555
       Align = alClient
       Caption = 'Next: Rules'
+      OnClick = Button1Click
       TabOrder = 0
     end
   end
   object NonTerminalGroup: TGroupBox
     Left = 282
-    Height = 280
+    Height = 500
     Top = 0
-    Width = 286
+    Width = 273
     Align = alClient
     Caption = 'Non Terminals'
-    ClientHeight = 250
-    ClientWidth = 282
-    TabOrder = 3
+    ClientHeight = 470
+    ClientWidth = 269
+    TabOrder = 1
     object NonTerminalBox: TListBox
       Left = 0
-      Height = 228
+      Height = 432
       Top = 0
-      Width = 282
+      Width = 269
       Align = alClient
       ItemHeight = 0
       TabOrder = 0
     end
     object Panel3: TPanel
       Left = 0
-      Height = 22
-      Top = 228
-      Width = 282
+      Height = 38
+      Top = 432
+      Width = 269
       Align = alBottom
       BevelOuter = bvNone
-      ClientHeight = 22
-      ClientWidth = 282
+      ClientHeight = 38
+      ClientWidth = 269
       TabOrder = 1
       object NonTerminalAdd: TButton
-        Left = 237
-        Height = 22
+        Left = 224
+        Height = 38
         Top = 0
         Width = 45
         Align = alRight
@@ -138,11 +143,11 @@ object Form1: TForm1
         Font.Color = clLime
         OnClick = NonTerminalAddClick
         ParentFont = False
-        TabOrder = 0
+        TabOrder = 1
       end
       object NonTerminalDelete: TButton
-        Left = 192
-        Height = 22
+        Left = 179
+        Height = 38
         Top = 0
         Width = 45
         Align = alRight
@@ -150,16 +155,18 @@ object Form1: TForm1
         Font.Color = clRed
         OnClick = NonTerminalDeleteClick
         ParentFont = False
-        TabOrder = 1
+        TabOrder = 2
       end
       object NonTerminalEdit: TEdit
         Left = 0
-        Height = 22
+        Height = 38
         Top = 0
-        Width = 192
+        Width = 179
         Align = alClient
         OnEnter = TerminalEditEnter
-        TabOrder = 2
+        OnKeyDown = NonTerminalEditKeyDown
+        OnKeyUp = NonTerminalEditKeyUp
+        TabOrder = 0
       end
     end
   end

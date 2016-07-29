@@ -7,7 +7,7 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
-  Forms, SymbolForm, RuleEditor
+  Forms, SymbolForm, RuleEditor, StartSelector
   { you can add units after this };
 
 {$R *.res}
@@ -15,8 +15,9 @@ uses
 begin
   RequireDerivedFormResource:=True;
   Application.Initialize;
-  Application.CreateForm(TForm1, Form1);
-  Application.CreateForm(TForm2, Form2);
+			Application.CreateForm(TMainform, Mainform);
+			Application.CreateForm(TRuleEditForm, RuleEditForm);
+			Application.CreateForm(TStartSelectForm, StartSelectForm);
   Application.Run;
 end.
 

@@ -1,37 +1,41 @@
-object Form2: TForm2
+object RuleEditForm: TRuleEditForm
   Left = 0
-  Height = 546
+  Height = 556
   Top = 0
   Width = 557
-  ActiveControl = ListBox1
-  Caption = 'Form2'
-  ClientHeight = 546
+  ActiveControl = RuleBox
+  Caption = 'Rule editor'
+  ClientHeight = 556
   ClientWidth = 557
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
   Visible = False
-  object ListBox1: TListBox
+  object NTMBox: TListBox
     Left = 0
-    Height = 506
+    Height = 516
     Top = 40
     Width = 264
     Anchors = [akTop, akLeft, akBottom]
     ItemHeight = 0
+    OnClick = NTMBoxClick
     TabOrder = 0
   end
   object Label1: TLabel
     Left = 268
     Height = 25
-    Top = 291
+    Top = 297
     Width = 19
     Anchors = [akLeft]
     Caption = '->'
     ParentColor = False
   end
-  object ListBox2: TListBox
+  object RuleListBox: TListBox
     Left = 288
-    Height = 400
+    Height = 410
     Top = 40
     Width = 264
-    Anchors = [akTop, akLeft, akBottom]
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    Enabled = False
     ItemHeight = 0
     TabOrder = 1
   end
@@ -48,14 +52,14 @@ object Form2: TForm2
     Height = 33
     Top = 3
     Width = 100
+    Anchors = [akTop, akLeft, akRight]
     ItemHeight = 25
-    ItemIndex = 0
     Items.Strings = (
-      '0'
+      '(new)'
     )
+    OnChange = RuleBoxChange
     Style = csDropDownList
     TabOrder = 2
-    Text = '0'
   end
   object Label3: TLabel
     Left = 8
@@ -65,45 +69,73 @@ object Form2: TForm2
     Caption = 'Non Terminal'
     ParentColor = False
   end
-  object AddToRule: TButton
+  object AddToRuleButton: TButton
     Left = 507
     Height = 33
-    Top = 448
+    Top = 458
     Width = 45
-    Anchors = [akLeft, akBottom]
+    Anchors = [akRight, akBottom]
     Caption = '+'
+    Enabled = False
     Font.Color = clLime
+    OnClick = AddToRuleButtonClick
     ParentFont = False
     TabOrder = 3
   end
-  object DeleteFromRule: TButton
+  object DeleteFromRuleButton: TButton
     Left = 464
     Height = 33
-    Top = 448
+    Top = 458
     Width = 45
-    Anchors = [akLeft, akBottom]
+    Anchors = [akRight, akBottom]
     Caption = '-'
+    Enabled = False
     Font.Color = clRed
+    OnClick = DeleteFromRuleButtonClick
     ParentFont = False
     TabOrder = 4
   end
-  object DeleteRule: TButton
-    Left = 440
+  object DeleteRuleButton: TButton
+    Left = 438
     Height = 33
     Top = 3
-    Width = 114
+    Width = 116
+    Anchors = [akTop, akRight]
     Caption = 'Delete'
+    Enabled = False
     Font.Color = clRed
+    OnClick = DeleteRuleButtonClick
     ParentFont = False
     TabOrder = 5
   end
-  object ComboBox1: TComboBox
+  object ElementSelector: TComboBox
     Left = 288
     Height = 33
-    Top = 448
+    Top = 458
     Width = 176
-    Anchors = [akLeft, akBottom]
+    Anchors = [akLeft, akRight, akBottom]
+    AutoComplete = True
+    AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+    AutoDropDown = True
+    Enabled = False
     ItemHeight = 25
+    OnKeyUp = ElementSelectorKeyUp
     TabOrder = 6
+  end
+  object CreateGrammarButton: TButton
+    Left = 286
+    Height = 33
+    Top = 520
+    Width = 264
+    Anchors = [akRight, akBottom]
+    Caption = 'Create grammar'
+    OnClick = CreateGrammarButtonClick
+    TabOrder = 7
+  end
+  object OpenDialog1: TOpenDialog
+    Filter = 'XML Grammar|*.xml'
+    Options = [ofExtensionDifferent, ofEnableSizing, ofViewDetail]
+    left = 212
+    top = 34
   end
 end
